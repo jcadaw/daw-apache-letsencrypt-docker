@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  apache:
+    build: 
+      context: ./apache
+      args:
+        APACHE_VERSION: ${APACHE_VERSION}
+    image: "daw-apache-ssl:2021.11"
+    container_name: daw-apache-ssl
+    ports: 
+      - "80:80"
+      - "443:443"
+    environment:
+      LETS_ENCRYPT_EMAIL: ${LETS_ENCRYPT_EMAIL} 
+      LETS_ENCRYPT_DOMINIOS: ${LETS_ENCRYPT_DOMINIOS}
+      LETS_ENCRYPT_DIRECTORIO: ${LETS_ENCRYPT_DIRECTORIO}
+    volumes:
+      - etcletsencrypt:/etc/letsencrypt
+      - varletsencrypt:/var/lib/letsencrypt
+      - ${DIR_PROYECTO}:/var/www/html
+    networks:
+      daw-red-www-ssl:
+
+networks: 
+  daw-red-www-ssl:
+    name: daw-red-www-ssl
+volumes:
+  varletsencrypt:
+    name: daw-varletsencrypt
+  etcletsencrypt:
+    name: daw-etcletsencrypt
