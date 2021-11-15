@@ -39,6 +39,9 @@ Creación de un esqueleto para una aplicación web usando `Apache` y certificado
 
 El objetivo de este repositorio es servir de ejemplo o punto de partida para una aplicación web con servidor `Apache` y certificados SSL con Let's Encrypt sobre `docker`. 
 
+Se utiliza `certbot` para la solicitud de certificados en su forma `standalone`, se utiliza una tarea cron para reiniciar el contenedor y así poder renovar los certificados cuando sea necesario.
+
+
 `Docker compose` creará 1 contenedor: 
 * 1 contenedor con apache 2.4 y `certbot` (distribución alpine)
 
@@ -55,9 +58,10 @@ La estructura de los directorios/archivos es la siguiente:
 ├── docker
 │   ├── apache
 │   │   ├── Dockerfile
-│   │   ├── testhttps.jcadaw.tech.conf
+│   │   ├── dominio.conf
+│   │   ├── reiniciar-apache.sh
 │   │   └── verificar-letsencrypt.sh
-│   ├── .env
+│   ├── .env.default
 │   └── docker-compose.yml
 ├── .gitignore
 └── README.md
@@ -108,28 +112,75 @@ Fichero en el que configurar algunos parámetros para la creación de los conten
 
 ```
 APACHE_VERSION=2.4.51
+#Minutos (0-59), */15 cada quince minutos...
+APACHE_CRON_MINUTO=0
+#Hora (0-23)
+APACHE_CRON_HORA=2
+#Día de mes (1-31)
+APACHE_CRON_DIA_MES=*
+#Mes (1-12)
+APACHE_CRON_MES=*
+#Día de la semana (0-7) (Domingo=0 o 7)
+APACHE_CRON_DIA_SEMANA=*
 
-DIR_PROYECTO=../app
 
-LETS_ENCRYPT_EMAIL=usuario@gmail.com
-LETS_ENCRYPT_DOMINIOS=testhttps.jcadaw.tech,testhttps2.jcadaw.tech
-LETS_ENCRYPT_DIRECTORIO=testhttps.jcadaw.tech
+#ServerName global
+APACHE_GLOBAL_ServerName=testhttps.example.com
+#VirtualHost ServerName para puertos 80 y 443
+APACHE_VH_ServerName=testhttps.example.com
+#VirtualHost ServerAlias para puertos 80 y 443
+APACHE_VH_ServerAlias=testhttps2.example.com
+
+
+PROYECTO_RUTA=../app
+
+LETS_ENCRYPT_EMAIL=usuario@email.com
+LETS_ENCRYPT_DOMINIOS=testhttps.example.com,testhttps2.example.com
+LETS_ENCRYPT_DIR=testhttps.example.com
+
+TZDATA=Europe/Madrid
 ```
 
-`DIR_PROYECTO` es el directorio donde está nuestra aplicación web, será nuestro `DocumentRoot` dentro del `VirtualHost` que crearemos en el contenedor de apache
+##### Variables de contrucción de la imagen (build.args)
+
+Estas son variables que pueden ser utilizadas en la sección `build.args`: 
+
+`APACHE_VERSION` número del tag de la imagen oficial de apache alpine que se quiere utilizar. Nota: "-alpine" se concatena automáticamente.
+
+`APACHE_CRON_XXX`  hace referencia a la configuración cron que se va a utilizar:
+`APACHE_CRON_MINUTO` minuto (0-59), */15 cada quince minutos...
+`APACHE_CRON_HORA` hora (0-23)
+`APACHE_CRON_DIA_MES` día de mes (1-31)
+`APACHE_CRON_MES` mes (1-12)
+`APACHE_CRON_DIA_SEMANA` día de la semana (0-7) (Domingo=0 o 7)
+`TZDATA` zona horaria en la que se configura el contenedor
+
+##### Variables de entorno (environment)
+
+Estas son variables que pueden ser definidas en la sección `environment`:
+
+`APACHE_GLOBAL_ServerName` ServerName a utilizar globalmente (fuera de los VirtualHosts)
+`APACHE_VH_ServerName` ServerName utilizado para los 2 VirtualHosts que se crean por defecto (1 para el puerto 80 y otro para el 443)
+`APACHE_VH_ServerAlias` ServerAlias utilizado para los 2 VirtualHosts que se crean por defecto (1 para el puerto 80 y otro para el 443). Por defecto, sólo para un alias...
+
+`PROYECTO_RUTA` es el directorio donde está nuestra aplicación web, será nuestro `DocumentRoot` dentro del `VirtualHost` que crearemos en el contenedor de apache
 
 `LETS_ENCRYPT_EMAIL` es el correo con al que se mandarán las notificaciones importantes de Let's Encrypt
 `LETS_ENCRYPT_DOMINIOS` listado de dominios (separados por comas) para los que se quiere obtener el certificado
-`LETS_ENCRYPT_DIRECTORIO` subdirectorio en el que se almacenarán los certificados: /etc/letsencrypt/live/${LETS_ENCRYPT_DIRECTORIO}/*
+`LETS_ENCRYPT_DIR` subdirectorio en el que se almacenarán los certificados: /etc/letsencrypt/live/${LETS_ENCRYPT_DIR}/*
+
 
 <p align="right">(<a href="#top">volver arriba</a>)</p>
 
 #### directorio apache
 
-Contiene el `Dockerfile` para construir la imagen, basicamente copiamos el fichero de ejemplo de `VirtualHost` (testhttps.jcadaw.tech.conf) e incluimos dicho fichero en el `httpd.conf` para que arranque automáticamente esa configuración y además lanzamos como CMD el script `verificar-letsencrypt.sh`, mediante el cual solicitamos o renovamos el certificado para los dominios listados en `LETS_ENCRYPT_DOMINIOS`.
+Contiene el `Dockerfile` para construir la imagen, basicamente copiamos el fichero de ejemplo de `VirtualHost` (dominio.conf) e incluimos dicho fichero en el `httpd.conf` para que arranque automáticamente esa configuración y además lanzamos como CMD el script `verificar-letsencrypt.sh`, mediante el cual solicitamos o renovamos el certificado para los dominios listados en `LETS_ENCRYPT_DOMINIOS`.
 
+El script `reiniciar-apache.sh` lo utilizamos para matar el proceso httpd padre del contenedor, de manera que termina su ejecución, al tener configurado el servicio `apache` en el `docker-compose.yml` como `restart: always`, el contenedor se levanta automáticamente, iniciando el proceso de solicitud de certificado o renovación. 
 
-El fichero `testhttps.jcadaw.tech.conf` contiene una configuración de ejemplo en el que se redireccionan todas las peticiones `http` a `https`
+El script anterior, se ejecuta automáticamente mediante una tarea cron que se puede configurar con las variables build de la imagen APACHE_CRON_XXX
+
+El fichero `dominio.conf` contiene una configuración de ejemplo en el que se redireccionan todas las peticiones `http` a `https`
 
 
 
