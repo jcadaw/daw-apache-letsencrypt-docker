@@ -1,5 +1,5 @@
 # daw-apache-letsencrypt-docker
-Creación de un esqueleto para una aplicación web usando `Apache` y certificados SSL de Let's Encrypt, usando la imagen oficiales de apache `alpine`.
+Creación de un esqueleto para una aplicación web usando `Apache` y **certificados SSL** de **Let's Encrypt**, usando la imagen oficiales de apache `alpine`.
 <div id="top"></div>
 
 <!-- TABLE OF CONTENTS -->
@@ -37,7 +37,7 @@ Creación de un esqueleto para una aplicación web usando `Apache` y certificado
 <!-- ABOUT THE PROJECT -->
 ## Sobre el repo
 
-El objetivo de este repositorio es servir de ejemplo o punto de partida para una aplicación web con servidor `Apache` y certificados SSL con Let's Encrypt sobre `docker`. 
+El objetivo de este repositorio es servir de ejemplo o punto de partida para una aplicación web con servidor `Apache` y **certificados SSL** con **Let's Encrypt** sobre `docker`. 
 
 Se utiliza `certbot` para la solicitud de certificados en su forma `standalone`, se utiliza una tarea cron para reiniciar el contenedor y así poder renovar los certificados cuando sea necesario.
 
@@ -143,7 +143,7 @@ TZDATA=Europe/Madrid
 
 ##### Variables de contrucción de la imagen (build.args)
 
-Estas son variables que pueden ser utilizadas en la sección `build.args`: 
+Estas son variables que pueden ser utilizadas en la sección **build.args**: 
 
 `APACHE_VERSION` número del tag de la imagen oficial de apache alpine que se quiere utilizar. Nota: "-alpine" se concatena automáticamente.
 
@@ -157,36 +157,36 @@ Estas son variables que pueden ser utilizadas en la sección `build.args`:
 
 ##### Variables de entorno (environment)
 
-Estas son variables que pueden ser definidas en la sección `environment`:
+Estas son variables que pueden ser definidas en la sección **environment**:
 
 `APACHE_GLOBAL_ServerName` ServerName a utilizar globalmente (fuera de los VirtualHosts)
 `APACHE_VH_ServerName` ServerName utilizado para los 2 VirtualHosts que se crean por defecto (1 para el puerto 80 y otro para el 443)
 `APACHE_VH_ServerAlias` ServerAlias utilizado para los 2 VirtualHosts que se crean por defecto (1 para el puerto 80 y otro para el 443). Por defecto, sólo para un alias...
 
-`PROYECTO_RUTA` es el directorio donde está nuestra aplicación web, será nuestro `DocumentRoot` dentro del `VirtualHost` que crearemos en el contenedor de apache
+`PROYECTO_RUTA` es el directorio donde está nuestra aplicación web, será nuestro *DocumentRoot* dentro del *VirtualHost* que crearemos en el contenedor de apache
 
 `LETS_ENCRYPT_EMAIL` es el correo con al que se mandarán las notificaciones importantes de Let's Encrypt
 `LETS_ENCRYPT_DOMINIOS` listado de dominios (separados por comas) para los que se quiere obtener el certificado
-`LETS_ENCRYPT_DIR` subdirectorio en el que se almacenarán los certificados: /etc/letsencrypt/live/${LETS_ENCRYPT_DIR}/*
+`LETS_ENCRYPT_DIR` subdirectorio en el que se almacenarán los certificados: /etc/letsencrypt/live/**${LETS_ENCRYPT_DIR}**/*
 
 
 <p align="right">(<a href="#top">volver arriba</a>)</p>
 
 #### directorio apache
 
-Contiene el `Dockerfile` para construir la imagen, basicamente copiamos el fichero de ejemplo de `VirtualHost` (dominio.conf) e incluimos dicho fichero en el `httpd.conf` para que arranque automáticamente esa configuración y además lanzamos como CMD el script `verificar-letsencrypt.sh`, mediante el cual solicitamos o renovamos el certificado para los dominios listados en `LETS_ENCRYPT_DOMINIOS`.
+Contiene el **Dockerfile** para construir la imagen, basicamente copiamos el fichero de ejemplo de **VirtualHost** (dominio.conf) e incluimos dicho fichero en el **httpd.conf** para que arranque automáticamente esa configuración y además lanzamos como CMD el script ***verificar-letsencrypt.sh***, mediante el cual solicitamos o renovamos el certificado para los dominios listados en **LETS_ENCRYPT_DOMINIOS**.
 
-El script `reiniciar-apache.sh` lo utilizamos para matar el proceso httpd padre del contenedor, de manera que termina su ejecución, al tener configurado el servicio `apache` en el `docker-compose.yml` como `restart: always`, el contenedor se levanta automáticamente, iniciando el proceso de solicitud de certificado o renovación. 
+El script ***reiniciar-apache.sh*** lo utilizamos para matar el proceso httpd padre del contenedor, de manera que termina su ejecución, al tener configurado el servicio *apache* en el *docker-compose.yml* como **restart: always**, el contenedor se levanta automáticamente, iniciando el proceso de solicitud de certificado o renovación. 
 
-El script anterior, se ejecuta automáticamente mediante una tarea cron que se puede configurar con las variables build de la imagen APACHE_CRON_XXX
+El script anterior, se ejecuta automáticamente mediante una tarea cron que se puede configurar con las variables build de la imagen **APACHE_CRON_**XXX
 
-El fichero `dominio.conf` contiene una configuración de ejemplo en el que se redireccionan todas las peticiones `http` a `https`
+El fichero ***dominio.conf*** contiene una configuración de ejemplo en el que se redireccionan todas las peticiones **http** a **https**
 
 
 
 ## Imágenes de docker usadas
 
-Nos hemos basado en la imagen oficial de `apache`. Usamos además las distribuciones `alpine`.
+Nos hemos basado en la imagen oficial de `apache`. Usamos además las distribuciones *alpine*.
 
 * [apache](https://hub.docker.com/_/httpd)
 
@@ -197,11 +197,11 @@ Nos hemos basado en la imagen oficial de `apache`. Usamos además las distribuci
 <!-- GETTING STARTED -->
 ## Empezando
 
-Si quieres crear un proyecto con `apache` y certificados `ssl` usando contenedores `docker`, sigue las siguientes instrucciones:
+Si quieres crear un proyecto con *apache* y certificados *ssl* usando contenedores *docker*, sigue las siguientes instrucciones:
 
 ### Prerrequisitos
 
-Tienes que tener `docker` y `docker-compose` instalado en tu máquina
+Tienes que tener *docker* y *docker-compose* instalado en tu máquina
 
 ### Instalación
 
@@ -209,11 +209,11 @@ Tienes que tener `docker` y `docker-compose` instalado en tu máquina
    ```sh
    git clone https://github.com/jcadaw/daw-apache-letsencrypt-docker.git 
    ```
-2. Ve al directorio `./docker`
+2. Ve al directorio *./docker*
    ```sh
    cd docker
    ```
-3. Lanza `docker-compose`
+3. Lanza *docker-compose*
    ```sh
    docker-compose up -d
    ```
